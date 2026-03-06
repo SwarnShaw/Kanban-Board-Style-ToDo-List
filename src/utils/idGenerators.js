@@ -1,0 +1,7 @@
+export const taskId = () => 'task_' + Date.now()
+export const commentId = () => 'cmt_' + Date.now() + Math.random().toString(36).slice(2, 6)
+export const attachmentId = () => 'att_' + Date.now() + Math.random().toString(36).slice(2, 6)
+export const checklistId = () => 'chk_' + Date.now() + Math.random().toString(36).slice(2, 6)
+export const labelId = () => 'lbl_' + Date.now()
+export const boardId = () => 'board_' + Date.now()
+export const activityId = () => 'act_' + Date.now()
