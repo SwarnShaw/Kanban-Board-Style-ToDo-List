@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useBoardContext } from '../context/BoardContext'
 import BoardSelector from './BoardSelector'
 import FilterDropdown from './FilterDropdown'
+import { Search, X, Layers, Filter, BarChart2, Download, Moon } from 'lucide-react'
 
 export default function Navbar({
     view, setView, searchQuery, setSearchQuery,
@@ -54,7 +55,7 @@ export default function Navbar({
                 const rect = filterBtnRef.current.getBoundingClientRect()
                 setDropdownPos({
                     top: rect.bottom + 6,
-                    right: window.innerWidth - rect.right
+                    left: rect.left
                 })
             }
         }
@@ -83,7 +84,7 @@ export default function Navbar({
             const rect = filterBtnRef.current.getBoundingClientRect()
             setDropdownPos({
                 top: rect.bottom + 6,
-                right: window.innerWidth - rect.right
+                left: rect.left
             })
         }
         setShowFilter(true)
@@ -100,65 +101,62 @@ export default function Navbar({
             <nav className="navbar">
                 <div className="navbar-left">
                     <BoardSelector />
-                    <span className="navbar-brand">ToDo</span>
-                </div>
 
-                <div className="navbar-center">
-                    <div className={`search-bar ${mobileSearch ? 'expanded' : ''}`}>
-                        <span className="search-icon">🔍</span>
+                    <div className={`search-bar ${mobileSearch ? 'expanded' : ''} reference-search`}>
+                        <span className="search-icon">
+                            <Search size={14} />
+                        </span>
                         <input
                             type="text"
-                            placeholder="Search tasks…"
+                            placeholder="Search..."
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             aria-label="Search tasks"
                         />
                         {searchQuery && (
-                            <button className="search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">×</button>
+                            <button className="search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">
+                                <X size={14} />
+                            </button>
                         )}
                     </div>
-                </div>
-
-                <div className="navbar-right">
-                    <button
-                        className="search-icon-btn nav-icon-btn"
-                        onClick={() => setMobileSearch(!mobileSearch)}
-                        aria-label="Toggle search"
-                    >🔍</button>
 
                     <button
                         ref={swimlaneBtnRef}
-                        className={`nav-btn ${swimlaneMode !== 'none' ? 'active' : ''}`}
+                        className={`nav-btn btn-ref-filter ${swimlaneMode !== 'none' ? 'active' : ''}`}
                         onClick={() => setShowSwimlane(!showSwimlane)}
                     >
-                        Swimlanes ▾
+                        <Layers size={14} />
+                        Swimlanes
                     </button>
-
-                    <div className="view-toggle">
-                        <button className={view === 'board' ? 'active' : ''} onClick={() => setView('board')} aria-label="Board view">⊞</button>
-                        <button className={view === 'list' ? 'active' : ''} onClick={() => setView('list')} aria-label="List view">≡</button>
-                    </div>
-
-                    <button className="nav-icon-btn" onClick={onOpenAnalytics} aria-label="Analytics">📊</button>
 
                     <button
                         ref={filterBtnRef}
-                        className={`nav-btn ${activeFilterCount > 0 ? 'active' : ''}`}
+                        className={`nav-btn btn-ref-filter ${activeFilterCount > 0 ? 'active' : ''}`}
                         onClick={() => showFilter ? setShowFilter(false) : openFilter()}
                     >
-                        Filter {activeFilterCount > 0 ? `(${activeFilterCount})` : '▾'}
+                        <Filter size={14} />
+                        Filter {activeFilterCount > 0 && `(${activeFilterCount})`}
                     </button>
-
-                    <button className="nav-icon-btn" onClick={toggleTheme} aria-label="Toggle theme">
-                        {theme === 'dark' ? '🌙' : '☀️'}
-                    </button>
-
-                    <button className="nav-btn" onClick={handleExport}>Export ↓</button>
                 </div>
+
+                <div className="navbar-right">
+
+                    <button className="nav-icon-btn-minimal" onClick={onOpenAnalytics} aria-label="Analytics">
+                        <BarChart2 size={16} />
+                    </button>
+                    <button className="nav-icon-btn-minimal" onClick={handleExport} aria-label="Export">
+                        <Download size={16} />
+                    </button>
+                    <button className="nav-icon-btn-minimal" onClick={toggleTheme} aria-label="Toggle Theme">
+                        <Moon size={16} />
+                    </button>
+                </div>
+
             </nav>
 
+            {/* Swimlanes Dropdown */}
             {showSwimlane && (
-                <div ref={swimlaneRef} className="filter-dropdown" style={{ ...getSwimlaneDropdownPos(), width: 180 }}>
+                <div ref={swimlaneRef} className="filter-dropdown" style={{ ...getSwimlaneDropdownPos(), position: 'fixed', width: 180, zIndex: 1000 }}>
                     {['none', 'priority', 'assignee', 'label'].map(mode => (
                         <div
                             key={mode}
@@ -178,40 +176,45 @@ export default function Navbar({
                 </div>
             )}
 
-            {/* Filter dropdown via createPortal — right-aligned to Filter button */}
-            {showFilter && createPortal(
-                <>
-                    <div
-                        style={{ position: 'fixed', inset: 0, zIndex: 499, background: 'transparent' }}
-                        onClick={() => setShowFilter(false)}
-                    />
-                    <div
-                        ref={filterRef}
-                        style={{
-                            position: 'fixed',
-                            top: dropdownPos.top,
-                            right: dropdownPos.right,
-                            left: 'auto',
-                            zIndex: 500,
-                            width: 300,
-                        }}
-                    >
-                        <FilterDropdown filters={filters} setFilters={setFilters} />
-                    </div>
-                </>,
-                document.body
-            )}
+            {/* Filter Dropdown via createPortal — right-aligned to Filter button */}
+            {
+                showFilter && createPortal(
+                    <>
+                        <div
+                            style={{ position: 'fixed', inset: 0, zIndex: 499, background: 'transparent' }}
+                            onClick={() => setShowFilter(false)}
+                        />
+                        <div
+                            ref={filterRef}
+                            style={{
+                                position: 'fixed',
+                                top: dropdownPos.top,
+                                left: dropdownPos.left,
+                                zIndex: 1000,
+                                width: 320,
+                            }}
+                        >
+                            <FilterDropdown filters={filters} setFilters={setFilters} />
+                        </div>
+                    </>,
+                    document.body
+                )
+            }
 
-            {filterPills.length > 0 && (
-                <div className="filter-pills-bar">
-                    {filterPills.map((pill, i) => (
-                        <span key={i} className="filter-pill">
-                            {pill.label}
-                            <button onClick={() => removePill(pill)} aria-label={`Remove ${pill.label} filter`}>×</button>
-                        </span>
-                    ))}
-                </div>
-            )}
+            {
+                filterPills.length > 0 && (
+                    <div className="filter-pills-bar">
+                        {filterPills.map((pill, i) => (
+                            <span key={i} className="filter-pill">
+                                {pill.label}
+                                <button onClick={() => removePill(pill)} aria-label={`Remove ${pill.label} filter`}>
+                                    <X size={12} />
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                )
+            }
         </>
     )
 }

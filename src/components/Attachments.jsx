@@ -2,18 +2,19 @@ import React, { useState, useRef } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { attachmentId as genAttachmentId } from '../utils/idGenerators'
 import { formatSize } from '../utils/formatSize'
+import { Paperclip, Image as ImageIcon, FileText, Video, Music, FileEdit, Archive, BarChart, File, XCircle, Eye, Download, X } from 'lucide-react'
 
-function getFileIcon(type) {
-    if (!type) return '📎'
-    if (type.startsWith('image/')) return '🖼️'
-    if (type === 'application/pdf') return '📄'
-    if (type.startsWith('video/')) return '🎬'
-    if (type.startsWith('audio/')) return '🎵'
-    if (type.startsWith('text/')) return '📝'
-    if (type.includes('zip') || type.includes('compressed') || type.includes('archive')) return '🗜️'
-    if (type.includes('sheet') || type.includes('csv') || type.includes('excel')) return '📊'
-    if (type.includes('presentation') || type.includes('powerpoint')) return '📑'
-    return '📎'
+function getFileIcon(type, size = 16) {
+    if (!type) return <Paperclip size={size} />
+    if (type.startsWith('image/')) return <ImageIcon size={size} />
+    if (type === 'application/pdf') return <FileText size={size} />
+    if (type.startsWith('video/')) return <Video size={size} />
+    if (type.startsWith('audio/')) return <Music size={size} />
+    if (type.startsWith('text/')) return <FileEdit size={size} />
+    if (type.includes('zip') || type.includes('compressed') || type.includes('archive')) return <Archive size={size} />
+    if (type.includes('sheet') || type.includes('csv') || type.includes('excel')) return <BarChart size={size} />
+    if (type.includes('presentation') || type.includes('powerpoint')) return <File size={size} />
+    return <Paperclip size={size} />
 }
 
 function isViewable(type) {
@@ -110,7 +111,9 @@ export default function Attachments({ taskId, onViewFile }) {
             {storageWarning && (
                 <div className="storage-warning">
                     ⚠ localStorage usage exceeds 4MB. Some uploads may fail.
-                    <button onClick={() => setStorageWarning(false)}>×</button>
+                    <button onClick={() => setStorageWarning(false)}>
+                        <X size={14} />
+                    </button>
                 </div>
             )}
 
@@ -128,7 +131,7 @@ export default function Attachments({ taskId, onViewFile }) {
                                 </>
                             ) : att.status === 'error' ? (
                                 <>
-                                    <span className="attachment-icon">❌</span>
+                                    <span className="attachment-icon"><XCircle size={16} color="var(--danger)" /></span>
                                     <div className="attachment-info">
                                         <div className="attachment-name">{att.name.slice(0, 30)}</div>
                                         <div className="attachment-error-text">Upload failed</div>
@@ -137,7 +140,9 @@ export default function Attachments({ taskId, onViewFile }) {
                                         className="attachment-delete"
                                         style={{ opacity: 1 }}
                                         onClick={() => dispatch({ type: 'DELETE_ATTACHMENT', payload: { taskId, attachmentId: att.id } })}
-                                    >×</button>
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </>
                             ) : (
                                 <>
@@ -148,15 +153,21 @@ export default function Attachments({ taskId, onViewFile }) {
                                     </div>
                                     <div className="attachment-actions">
                                         {isViewable(att.type) && (
-                                            <button onClick={() => onViewFile(att)}>👁 View</button>
+                                            <button onClick={() => onViewFile(att)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Eye size={12} /> View
+                                            </button>
                                         )}
-                                        <button onClick={() => handleDownload(att)}>⬇ Download</button>
+                                        <button onClick={() => handleDownload(att)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Download size={12} /> Download
+                                        </button>
                                     </div>
                                     <button
                                         className="attachment-delete"
                                         onClick={() => dispatch({ type: 'DELETE_ATTACHMENT', payload: { taskId, attachmentId: att.id } })}
                                         aria-label="Delete attachment"
-                                    >×</button>
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </>
                             )}
                         </div>

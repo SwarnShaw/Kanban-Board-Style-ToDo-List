@@ -5,6 +5,7 @@ import Board from './components/Board'
 import ListView from './components/ListView'
 import Analytics from './components/Analytics'
 import TaskModal from './components/TaskModal'
+import BackgroundShapes from './components/BackgroundShapes'
 
 export default function App() {
     const [view, setView] = useState('board')
@@ -50,6 +51,7 @@ export default function App() {
 
     return (
         <BoardProvider>
+            <BackgroundShapes />
             <Navbar
                 view={view}
                 setView={setView}

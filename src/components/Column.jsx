@@ -14,7 +14,7 @@ export default function Column({ col, tasks, searchQuery, matchesFilters, onAddT
     const count = tasks.length
 
     return (
-        <div className="column-wrapper">
+        <div className={`column-wrapper ${col.id}`}>
             <div className="column-header">
                 <span className="column-title">{col.title}</span>
                 <span className="task-count">{count}</span>

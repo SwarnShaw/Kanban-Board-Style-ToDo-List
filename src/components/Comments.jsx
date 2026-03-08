@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { commentId as genCommentId } from '../utils/idGenerators'
 import { formatTimestamp } from '../utils/formatDate'
+import { Check, X } from 'lucide-react'
 
 export default function Comments({ taskId }) {
     const { activeTasks, dispatch } = useBoardContext()
@@ -56,8 +57,9 @@ export default function Comments({ taskId }) {
                     className={`comment-post-btn ${posted ? 'posted' : ''}`}
                     onClick={handlePost}
                     disabled={!input.trim() && !posted}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                 >
-                    {posted ? '✓ Posted' : 'Post'}
+                    {posted ? <><Check size={14} /> Posted</> : 'Post'}
                 </button>
             </div>
             {comments.length > 0 && (
@@ -70,7 +72,9 @@ export default function Comments({ taskId }) {
                                 className="comment-delete"
                                 onClick={() => dispatch({ type: 'DELETE_COMMENT', payload: { taskId, commentId: comment.id } })}
                                 aria-label="Delete comment"
-                            >×</button>
+                            >
+                                <X size={14} />
+                            </button>
                         </div>
                     ))}
                 </div>

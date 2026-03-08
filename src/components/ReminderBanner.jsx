@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { isOverdue, isDueToday } from '../utils/formatDate'
+import { AlertTriangle, X } from 'lucide-react'
 
 export default function ReminderBanner({ setFilters, hasActiveFilters, onVisibilityChange }) {
     const { activeTasks } = useBoardContext()
@@ -38,8 +39,12 @@ export default function ReminderBanner({ setFilters, hasActiveFilters, onVisibil
 
     return (
         <div className="reminder-banner" style={{ top: bannerTop }}>
-            <span onClick={handleClick}>⚠ {parts.join(' · ')}</span>
-            <button onClick={() => setDismissed(true)} aria-label="Dismiss reminder">×</button>
+            <span onClick={handleClick} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <AlertTriangle size={14} /> {parts.join(' · ')}
+            </span>
+            <button onClick={() => setDismissed(true)} aria-label="Dismiss reminder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={14} />
+            </button>
         </div>
     )
 }

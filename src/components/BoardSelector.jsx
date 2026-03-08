@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useBoardContext } from '../context/BoardContext'
+import { ChevronDown, Edit2, Trash2, Plus } from 'lucide-react'
 
 export default function BoardSelector() {
     const { state, dispatch, activeBoard } = useBoardContext()
@@ -69,8 +70,14 @@ export default function BoardSelector() {
 
     return (
         <div className="board-selector" ref={ref}>
-            <button ref={buttonRef} className="board-selector-btn" onClick={() => setOpen(!open)}>
-                📋 {activeBoard?.name || 'Board'} ▾
+            <button ref={buttonRef} className="reference-logo" onClick={() => setOpen(!open)}>
+                <div className="ref-logo-bg">
+                    <div className="ref-logo-icon">
+                        <span /><span /><span /><span />
+                    </div>
+                </div>
+                <span className="ref-logo-text">{activeBoard ? activeBoard.name : 'My Board'}</span>
+                <ChevronDown className="ref-logo-chevron" size={14} />
             </button>
 
             {open && (
@@ -108,10 +115,14 @@ export default function BoardSelector() {
                                     </span>
                                     <div className="board-item-actions">
                                         <button onClick={() => { setRenamingId(board.id); setRenameValue(board.name) }}
-                                            aria-label="Rename board">✏️</button>
+                                            aria-label="Rename board">
+                                            <Edit2 size={13} />
+                                        </button>
                                         {state.boards.length > 1 && (
                                             <button className="delete" onClick={() => setDeleteConfirmId(board.id)}
-                                                aria-label="Delete board">🗑️</button>
+                                                aria-label="Delete board">
+                                                <Trash2 size={13} />
+                                            </button>
                                         )}
                                     </div>
                                 </>
@@ -142,7 +153,9 @@ export default function BoardSelector() {
                             disabled={atLimit}
                             title={atLimit ? 'Maximum 10 boards reached' : ''}
                         >
-                            + New Board
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                <Plus size={14} /> New Board
+                            </span>
                         </button>
                     )}
                 </div>

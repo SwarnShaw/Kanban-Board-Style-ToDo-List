@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Download, X } from 'lucide-react'
 
 export default function Lightbox({ attachment, onClose }) {
     useEffect(() => {
@@ -42,8 +43,12 @@ export default function Lightbox({ attachment, onClose }) {
             <div className="lightbox-top-bar">
                 <span className="lightbox-filename">{attachment.name}</span>
                 <div className="lightbox-actions">
-                    <button onClick={handleDownload}>⬇ Download</button>
-                    <button onClick={onClose}>× Close</button>
+                    <button onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Download size={14} /> Download
+                    </button>
+                    <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <X size={14} /> Close
+                    </button>
                 </div>
             </div>
             <div className="lightbox-content" onClick={handleOverlayClick}>

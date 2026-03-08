@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { labelId as genLabelId } from '../utils/idGenerators'
+import { DEFAULT_LABELS } from '../constants/defaultLabels'
+import { X, Check, Trash2 } from 'lucide-react'
 
 const SWATCH_COLORS = [
     '#ff2a6d', '#05d9e8', '#c084fc', '#fb923c',
@@ -12,6 +14,7 @@ export default function LabelPicker({ taskId }) {
     const [showDropdown, setShowDropdown] = useState(false)
     const [newLabelName, setNewLabelName] = useState('')
     const [newLabelColor, setNewLabelColor] = useState(SWATCH_COLORS[0])
+    const [deletingId, setDeletingId] = useState(null)
     const ref = useRef(null)
     const fieldRef = useRef(null)
 
@@ -62,7 +65,9 @@ export default function LabelPicker({ taskId }) {
                         style={{ backgroundColor: label.color }}
                     >
                         {label.name}
-                        <button onClick={(e) => { e.stopPropagation(); removeLabel(label.id) }}>×</button>
+                        <button onClick={(e) => { e.stopPropagation(); removeLabel(label.id) }}>
+                            <X size={12} />
+                        </button>
                     </span>
                 ))}
             </div>
@@ -72,10 +77,53 @@ export default function LabelPicker({ taskId }) {
                     {activeLabels.map(label => {
                         const isApplied = appliedLabelIds.includes(label.id)
                         return (
-                            <div key={label.id} className="label-option" onClick={() => toggleLabel(label.id)}>
-                                <span className="check">{isApplied ? '✓' : ''}</span>
-                                <span className="label-color-pip" style={{ backgroundColor: label.color }} />
-                                <span>{label.name}</span>
+                            <div key={label.id} className="label-option" style={{ padding: '0 8px 0 12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flex: 1, padding: '6px 0' }} onClick={() => toggleLabel(label.id)}>
+                                    <span className="check" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {isApplied ? <Check size={12} /> : ''}
+                                    </span>
+                                    <span className="label-color-pip" style={{ backgroundColor: label.color }} />
+                                    <span>{label.name}</span>
+                                </div>
+                                {deletingId === label.id ? (
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                dispatch({ type: 'DELETE_LABEL', payload: { labelId: label.id } })
+                                                setDeletingId(null)
+                                            }}
+                                            style={{ background: 'var(--danger, #ff4d4f)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: 10, cursor: 'pointer' }}
+                                        >
+                                            Sure?
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setDeletingId(null)
+                                            }}
+                                            style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: 10, cursor: 'pointer' }}
+                                        >
+                                            No
+                                        </button>
+                                    </div>
+                                ) : (
+                                    !DEFAULT_LABELS.find(dl => dl.id === label.id) && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setDeletingId(label.id) }}
+                                            className="delete-label-btn"
+                                            style={{
+                                                background: 'none', border: 'none', color: 'var(--text-secondary)',
+                                                cursor: 'pointer', fontSize: 13, padding: '8px', margin: '-4px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}
+                                            aria-label="Delete label"
+                                            title="Delete label globally"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )
+                                )}
                             </div>
                         )
                     })}

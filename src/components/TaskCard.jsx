@@ -5,6 +5,7 @@ import { useBoardContext } from '../context/BoardContext'
 import { nameToColor } from '../utils/generateColor'
 import { formatDateShort, isOverdue, isDueToday, isDueTomorrow } from '../utils/formatDate'
 import { activityId } from '../utils/idGenerators'
+import { Clock, Calendar, MessageSquare, Paperclip, Edit2, Trash2 } from 'lucide-react'
 
 export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
     const { activeLabels, dispatch } = useBoardContext()
@@ -102,8 +103,8 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                 <div className="card-meta">
                     <div className="card-meta-left">
                         {task.dueDate && (
-                            <span className={`due-chip ${dueDateClass}`}>
-                                {dueDateClass === 'due-today' ? '🕐' : '📅'} {formatDateShort(task.dueDate)}
+                            <span className={`due-chip ${dueDateClass}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {dueDateClass === 'due-today' ? <Clock size={12} /> : <Calendar size={12} />} {formatDateShort(task.dueDate)}
                             </span>
                         )}
                         {totalChecklist > 0 && (
@@ -120,13 +121,17 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                     </div>
                     <div className="card-meta-right">
                         {commentCount > 0 && (
-                            <span className="card-comment-count">💬 {commentCount}</span>
+                            <span className="card-comment-count" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <MessageSquare size={12} /> {commentCount}
+                            </span>
                         )}
                         {uploadingAttachments > 0 && (
                             <span className="upload-spinner-card" title="Uploading..." />
                         )}
                         {doneAttachments > 0 && (
-                            <span className="card-attachment-count">📎 {doneAttachments}</span>
+                            <span className="card-attachment-count" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Paperclip size={12} /> {doneAttachments}
+                            </span>
                         )}
                         {initials && (
                             <div
@@ -145,8 +150,12 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                 <>
                     {!showConfirm ? (
                         <div className="card-actions">
-                            <button onClick={(e) => { e.stopPropagation(); onEdit() }} aria-label="Edit task">✏️</button>
-                            <button className="delete-btn" onClick={(e) => { e.stopPropagation(); setShowConfirm(true) }} aria-label="Delete task">🗑️</button>
+                            <button onClick={(e) => { e.stopPropagation(); onEdit() }} aria-label="Edit task">
+                                <Edit2 size={13} />
+                            </button>
+                            <button className="delete-btn" onClick={(e) => { e.stopPropagation(); setShowConfirm(true) }} aria-label="Delete task">
+                                <Trash2 size={13} />
+                            </button>
                         </div>
                     ) : (
                         <div className="card-inline-confirm" onClick={e => e.stopPropagation()}>

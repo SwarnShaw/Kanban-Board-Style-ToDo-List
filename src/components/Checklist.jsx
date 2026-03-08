@@ -4,6 +4,7 @@ import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } 
 import { CSS } from '@dnd-kit/utilities'
 import { useBoardContext } from '../context/BoardContext'
 import { checklistId as genChecklistId } from '../utils/idGenerators'
+import { GripVertical, X, Plus } from 'lucide-react'
 
 function ChecklistItem({ item, taskId }) {
     const { dispatch } = useBoardContext()
@@ -12,7 +13,9 @@ function ChecklistItem({ item, taskId }) {
 
     return (
         <div ref={setNodeRef} style={style} className="checklist-item">
-            <span className="checklist-drag-handle" {...attributes} {...listeners}>⠿</span>
+            <span className="checklist-drag-handle" {...attributes} {...listeners}>
+                <GripVertical size={14} />
+            </span>
             <input
                 type="checkbox"
                 className="checklist-checkbox"
@@ -48,7 +51,9 @@ function ChecklistItem({ item, taskId }) {
                 className="checklist-delete"
                 onClick={() => dispatch({ type: 'DELETE_CHECKLIST_ITEM', payload: { taskId, itemId: item.id } })}
                 aria-label="Delete checklist item"
-            >×</button>
+            >
+                <X size={14} />
+            </button>
         </div>
     )
 }
@@ -85,8 +90,8 @@ export default function Checklist({ taskId }) {
         <div className="checklist-section">
             <div className="checklist-header">
                 <span className="field-label" style={{ margin: 0 }}>Checklist</span>
-                <button className="add-checklist-btn" onClick={addItem} style={{ width: 'auto', padding: '4px 10px', marginTop: 0 }}>
-                    + Add item
+                <button className="add-checklist-btn" onClick={addItem} style={{ width: 'auto', padding: '4px 10px', marginTop: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Plus size={14} /> Add item
                 </button>
             </div>
 
@@ -111,7 +116,9 @@ export default function Checklist({ taskId }) {
             </DndContext>
 
             {total === 0 && (
-                <button className="add-checklist-btn" onClick={addItem}>+ Add checklist item</button>
+                <button className="add-checklist-btn" onClick={addItem} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <Plus size={14} /> Add checklist item
+                </button>
             )}
         </div>
     )

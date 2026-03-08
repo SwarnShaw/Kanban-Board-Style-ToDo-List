@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { FIXED_COLUMNS } from '../constants/columns'
 import { isOverdue, isDueToday, getRelativeTime } from '../utils/formatDate'
+import { X } from 'lucide-react'
 
 export default function Analytics({ onClose }) {
     const { activeTasks, activeBoard } = useBoardContext()
@@ -62,7 +63,9 @@ export default function Analytics({ onClose }) {
             <div className="analytics-panel">
                 <div className="analytics-header">
                     <h2>Analytics</h2>
-                    <button className="analytics-close" onClick={onClose} aria-label="Close analytics">×</button>
+                    <button className="analytics-close" onClick={onClose} aria-label="Close analytics" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <X size={14} />
+                    </button>
                 </div>
                 <div className="analytics-body">
                     <div className="stat-grid">
