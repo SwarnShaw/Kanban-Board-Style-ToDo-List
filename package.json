@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "vercel-install": "npm install && chmod +x node_modules/.bin/vite",
     "preview": "vite preview"
   },
   "dependencies": {
