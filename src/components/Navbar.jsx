@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useBoardContext } from '../context/BoardContext'
 import BoardSelector from './BoardSelector'
 import FilterDropdown from './FilterDropdown'
-import { Search, X, Layers, Filter, BarChart2, Download, Moon } from 'lucide-react'
+import { Search, X, Layers, Filter, BarChart2, Download, Moon, Sun, LayoutGrid, List } from 'lucide-react'
 
 export default function Navbar({
     view, setView, searchQuery, setSearchQuery,
@@ -13,7 +13,7 @@ export default function Navbar({
     const { state, dispatch } = useBoardContext()
     const [showFilter, setShowFilter] = useState(false)
     const [showSwimlane, setShowSwimlane] = useState(false)
-    const [mobileSearch, setMobileSearch] = useState(false)
+    const [drawerOpen, setDrawerOpen] = useState(false)
     const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 })
     const filterBtnRef = useRef(null)
     const swimlaneBtnRef = useRef(null)
@@ -96,14 +96,67 @@ export default function Navbar({
         return { top: rect.bottom + 4, left: rect.left }
     }
 
+    const closeDrawer = () => setDrawerOpen(false)
+    const boards = state.boards || []
+    const activeBoardId = state.activeBoardId
+
+    const switchBoard = (boardId) => {
+        dispatch({ type: 'SWITCH_BOARD', payload: { boardId } })
+    }
+
+    const createBoard = () => {
+        const name = prompt('Board name:')
+        if (name && name.trim()) {
+            dispatch({ type: 'CREATE_BOARD', payload: { name: name.trim().slice(0, 40) } })
+        }
+    }
+
     return (
         <>
             <nav className="navbar">
+                {/* ── MOBILE TOP ROW ── */}
+                <div className="navbar-top-row">
+                    <button
+                        className={`mob-hamburger ${drawerOpen ? 'open' : ''}`}
+                        onClick={() => setDrawerOpen(!drawerOpen)}
+                        aria-label="Menu"
+                    >
+                        <span className="mob-hamburger-icon">
+                            <span /><span /><span />
+                        </span>
+                    </button>
+                    <div className="app-name">Kanban</div>
+                    <button className="theme-toggle-btn mob-theme-btn-mobile" onClick={toggleTheme} aria-label="Toggle Theme">
+                        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                    </button>
+                </div>
+
+                {/* ── MOBILE SEARCH ROW (Tier 2) ── */}
+                <div className="navbar-search-row">
+                    <div className="search-bar">
+                        <span className="search-bar-icon"><Search size={14} /></span>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            aria-label="Search tasks"
+                        />
+                        {searchQuery && (
+                            <button className="search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* ── DESKTOP LEFT GROUP ── */}
                 <div className="navbar-left">
+                    <div className="app-name">Kanban</div>
                     <BoardSelector />
 
-                    <div className={`search-bar ${mobileSearch ? 'expanded' : ''} reference-search`}>
-                        <span className="search-icon">
+                    <div className="search-bar">
+                        <span className="search-bar-icon">
                             <Search size={14} />
                         </span>
                         <input
@@ -120,9 +173,11 @@ export default function Navbar({
                         )}
                     </div>
 
+                    <div className="navbar-divider" />
+
                     <button
                         ref={swimlaneBtnRef}
-                        className={`nav-btn btn-ref-filter ${swimlaneMode !== 'none' ? 'active' : ''}`}
+                        className={`navbar-btn ${swimlaneMode !== 'none' ? 'active' : ''}`}
                         onClick={() => setShowSwimlane(!showSwimlane)}
                     >
                         <Layers size={14} />
@@ -131,7 +186,7 @@ export default function Navbar({
 
                     <button
                         ref={filterBtnRef}
-                        className={`nav-btn btn-ref-filter ${activeFilterCount > 0 ? 'active' : ''}`}
+                        className={`navbar-btn ${activeFilterCount > 0 ? 'active' : ''}`}
                         onClick={() => showFilter ? setShowFilter(false) : openFilter()}
                     >
                         <Filter size={14} />
@@ -139,22 +194,144 @@ export default function Navbar({
                     </button>
                 </div>
 
+                {/* ── DESKTOP RIGHT GROUP ── */}
                 <div className="navbar-right">
+                    <div className="view-toggle-group">
+                        <button
+                            className={`view-toggle-btn ${view === 'board' ? 'active' : ''}`}
+                            onClick={() => setView('board')}
+                            aria-label="Grid view"
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                        <button
+                            className={`view-toggle-btn ${view === 'list' ? 'active' : ''}`}
+                            onClick={() => setView('list')}
+                            aria-label="List view"
+                        >
+                            <List size={16} />
+                        </button>
+                    </div>
 
-                    <button className="nav-icon-btn-minimal" onClick={onOpenAnalytics} aria-label="Analytics">
+                    <div className="navbar-divider" />
+
+                    <button className="navbar-icon-btn" onClick={onOpenAnalytics} aria-label="Analytics">
                         <BarChart2 size={16} />
                     </button>
-                    <button className="nav-icon-btn-minimal" onClick={handleExport} aria-label="Export">
+                    <button className="navbar-icon-btn" onClick={handleExport} aria-label="Export">
                         <Download size={16} />
                     </button>
-                    <button className="nav-icon-btn-minimal" onClick={toggleTheme} aria-label="Toggle Theme">
+                    <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme">
                         <Moon size={16} />
                     </button>
                 </div>
 
             </nav>
 
-            {/* Swimlanes Dropdown */}
+            {/* ── MOBILE DRAWER (FROM LEFT) ── */}
+            <div
+                className={`mob-drawer__backdrop ${drawerOpen ? 'mob-drawer__backdrop--open' : ''}`}
+                onClick={closeDrawer}
+            />
+            <div
+                className={`mob-drawer ${drawerOpen ? 'mob-drawer--open' : ''}`}
+                aria-hidden={!drawerOpen}
+            >
+                <div className="mob-drawer__header">
+                    <div className="mob-drawer__brand">
+                        <span className="mob-drawer__brand-name">ToDo</span>
+                        <span className="mob-drawer__brand-sub">Kanban</span>
+                    </div>
+                    <button className="mob-drawer__close" onClick={closeDrawer} aria-label="Close menu">
+                        <X size={16} />
+                    </button>
+                </div>
+
+                <div className="mob-drawer__body">
+                    {/* ── BOARDS SECTION ── */}
+                    <div className="mob-drawer__section">
+                        <div className="mob-drawer__section-label">My Boards</div>
+                        <div className="mob-drawer__boards-list">
+                            {boards.map(board => (
+                                <button
+                                    key={board.id}
+                                    className={`mob-drawer__board-item ${board.id === activeBoardId ? 'mob-drawer__board-item--active' : ''}`}
+                                    onClick={() => { switchBoard(board.id); closeDrawer() }}
+                                >
+                                    <span className="mob-drawer__board-dot" />
+                                    <span className="mob-drawer__board-name">{board.name}</span>
+                                    {board.id === activeBoardId && (
+                                        <span className="mob-drawer__board-active-badge">Active</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        {boards.length < 10 && (
+                            <button className="mob-drawer__new-board-btn"
+                                onClick={() => { createBoard(); closeDrawer() }}>
+                                <span className="mob-drawer__new-board-icon">+</span>
+                                New Board
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mob-drawer__divider" />
+
+                    {/* ── TOOLS SECTION ── */}
+                    <div className="mob-drawer__section">
+                        <div className="mob-drawer__section-label">Tools</div>
+                        <button className="mob-drawer__item"
+                            onClick={() => { onOpenAnalytics(); closeDrawer() }}>
+                            <span className="mob-drawer__item-icon"><BarChart2 size={20} /></span>
+                            <div className="mob-drawer__item-content">
+                                <span className="mob-drawer__item-label">Analytics</span>
+                                <span className="mob-drawer__item-sub">Charts, stats & activity</span>
+                            </div>
+                            <span className="mob-drawer__item-arrow">›</span>
+                        </button>
+                        <button className="mob-drawer__item"
+                            onClick={() => { handleExport(); closeDrawer() }}>
+                            <span className="mob-drawer__item-icon"><Download size={20} /></span>
+                            <div className="mob-drawer__item-content">
+                                <span className="mob-drawer__item-label">Export</span>
+                                <span className="mob-drawer__item-sub">Download as JSON</span>
+                            </div>
+                            <span className="mob-drawer__item-arrow">›</span>
+                        </button>
+                    </div>
+
+                    <div className="mob-drawer__divider" />
+
+                    {/* ── SETTINGS SECTION ── */}
+                    <div className="mob-drawer__section">
+                        <div className="mob-drawer__section-label">Settings</div>
+                        <div className="mob-drawer__item mob-drawer__item--no-tap">
+                            <span className="mob-drawer__item-icon">
+                                {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                            </span>
+                            <div className="mob-drawer__item-content">
+                                <span className="mob-drawer__item-label">
+                                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                                </span>
+                                <span className="mob-drawer__item-sub">Tap to switch theme</span>
+                            </div>
+                            <button
+                                className={`mob-drawer__toggle ${theme === 'dark' ? 'mob-drawer__toggle--on' : ''}`}
+                                onClick={toggleTheme}
+                                aria-label="Toggle theme"
+                            >
+                                <span className="mob-drawer__toggle-thumb" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mob-drawer__footer">
+                    <span className="mob-drawer__footer-text">ToDo · Kanban Task Manager</span>
+                </div>
+            </div>
+
+            {/* Swimlanes Dropdown (desktop only) */}
             {showSwimlane && (
                 <div ref={swimlaneRef} className="filter-dropdown" style={{ ...getSwimlaneDropdownPos(), position: 'fixed', width: 180, zIndex: 1000 }}>
                     {['none', 'priority', 'assignee', 'label'].map(mode => (
@@ -176,7 +353,7 @@ export default function Navbar({
                 </div>
             )}
 
-            {/* Filter Dropdown via createPortal — right-aligned to Filter button */}
+            {/* Filter Dropdown via createPortal */}
             {
                 showFilter && createPortal(
                     <>
@@ -207,7 +384,7 @@ export default function Navbar({
                         {filterPills.map((pill, i) => (
                             <span key={i} className="filter-pill">
                                 {pill.label}
-                                <button onClick={() => removePill(pill)} aria-label={`Remove ${pill.label} filter`}>
+                                <button className="filter-pill-remove" onClick={() => removePill(pill)} aria-label={`Remove ${pill.label} filter`}>
                                     <X size={12} />
                                 </button>
                             </span>

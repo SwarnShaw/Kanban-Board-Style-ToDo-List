@@ -5,8 +5,8 @@ import { DEFAULT_LABELS } from '../constants/defaultLabels'
 import { X, Check, Trash2 } from 'lucide-react'
 
 const SWATCH_COLORS = [
-    '#ff2a6d', '#05d9e8', '#c084fc', '#fb923c',
-    '#f7e733', '#00ff9f', '#7c6af7', '#f472b6'
+    'var(--danger)', 'var(--warning)', 'var(--success)', 'var(--info)',
+    'var(--priority-high)', 'var(--priority-medium)', 'var(--priority-low)', 'var(--accent)'
 ]
 
 export default function LabelPicker({ taskId }) {
@@ -93,7 +93,7 @@ export default function LabelPicker({ taskId }) {
                                                 dispatch({ type: 'DELETE_LABEL', payload: { labelId: label.id } })
                                                 setDeletingId(null)
                                             }}
-                                            style={{ background: 'var(--danger, #ff4d4f)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: 10, cursor: 'pointer' }}
+                                            style={{ background: 'var(--danger)', color: 'var(--text-on-accent)', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: 10, cursor: 'pointer' }}
                                         >
                                             Sure?
                                         </button>
