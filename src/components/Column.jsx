@@ -50,7 +50,7 @@ export default function Column({ col, tasks, searchQuery, matchesFilters, onAddT
                     onClick={() => onAddTask(col.id)}
                     aria-label={`Add task to ${col.title}`}
                 >
-                    <span className="add-icon">＋</span> Add Task
+                    ＋ Add Task
                 </button>
             </div>
         </div>

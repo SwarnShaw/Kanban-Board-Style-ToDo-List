@@ -1,6 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react'
+<<<<<<< HEAD
 import { useIsMobile } from '../hooks/useIsMobile'
 import { DndContext, closestCorners, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
+=======
+import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
+>>>>>>> parent of 738a7e0 (v3)
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardContext } from '../context/BoardContext'
 import { FIXED_COLUMNS } from '../constants/columns'
@@ -19,9 +23,7 @@ export default function Board({ searchQuery, filters, swimlaneMode, onAddTask, o
     const isMobile = useIsMobile()
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
-        useSensor(KeyboardSensor)
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
     )
 
     const filteredTasks = useMemo(() => {

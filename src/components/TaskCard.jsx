@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useBoardContext } from '../context/BoardContext'
@@ -36,13 +36,6 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
     const doneAttachments = (task.attachments || []).filter(a => a.status === 'done').length
     const uploadingAttachments = (task.attachments || []).filter(a => a.status === 'uploading').length
 
-    const [isDeleting, setIsDeleting] = useState(false)
-    const [justDropped, setJustDropped] = useState(false)
-    const [badgeUpdated, setBadgeUpdated] = useState(false)
-
-    const prevIsDragging = useRef(false)
-    const prevMeta = useRef({ checkedCount: 0, commentCount: 0, doneAttachments: 0 })
-
     const dueDateClass = task.dueDate
         ? isOverdue(task.dueDate) ? 'overdue'
             : isDueToday(task.dueDate) ? 'due-today'
@@ -54,44 +47,17 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
         ? task.assignee.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
         : null
 
-    useEffect(() => {
-        if (prevIsDragging.current && !isDragging) {
-            setJustDropped(true)
-            const t = setTimeout(() => setJustDropped(false), 400)
-            return () => clearTimeout(t)
-        }
-        prevIsDragging.current = isDragging
-    }, [isDragging])
-
-    useEffect(() => {
-        const prev = prevMeta.current
-        if (
-            checkedCount > prev.checkedCount ||
-            commentCount > prev.commentCount ||
-            doneAttachments > prev.doneAttachments
-        ) {
-            setBadgeUpdated(true)
-            const t = setTimeout(() => setBadgeUpdated(false), 400)
-            prevMeta.current = { checkedCount, commentCount, doneAttachments }
-            return () => clearTimeout(t)
-        }
-        prevMeta.current = { checkedCount, commentCount, doneAttachments }
-    }, [checkedCount, commentCount, doneAttachments])
-
     const handleDelete = () => {
-        setIsDeleting(true)
-        setTimeout(() => {
-            dispatch({ type: 'DELETE_TASK', payload: { taskId: task.id } })
-            dispatch({
-                type: 'LOG_ACTIVITY',
-                payload: {
-                    entry: {
-                        id: activityId(), type: 'deleted', taskTitle: task.title,
-                        fromColumn: null, toColumn: null, timestamp: new Date().toISOString()
-                    }
+        dispatch({ type: 'DELETE_TASK', payload: { taskId: task.id } })
+        dispatch({
+            type: 'LOG_ACTIVITY',
+            payload: {
+                entry: {
+                    id: activityId(), type: 'deleted', taskTitle: task.title,
+                    fromColumn: null, toColumn: null, timestamp: new Date().toISOString()
                 }
-            })
-        }, 250)
+            }
+        })
     }
 
     const handleCardClick = (e) => {
@@ -108,7 +74,7 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
             style={style}
             {...attributes}
             {...listeners}
-            className={`task-card ${priorityClass} ${isDragging ? 'dragging' : ''} ${isOverlay ? 'overlay' : ''} ${justDropped ? 'just-dropped' : ''} ${isDeleting ? 'deleting' : ''}`}
+            className={`task-card ${priorityClass} ${isDragging ? 'dragging' : ''} ${isOverlay ? 'overlay' : ''}`}
             onClick={handleCardClick}
             role="button"
             aria-label={`Task: ${task.title}`}
@@ -142,7 +108,7 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                             </span>
                         )}
                         {totalChecklist > 0 && (
-                            <div className={`checklist-progress ${badgeUpdated ? 'badge-updated' : ''}`}>
+                            <div className="checklist-progress">
                                 <span className="checklist-count">{checkedCount}/{totalChecklist}</span>
                                 <div className="checklist-bar">
                                     <div
@@ -155,7 +121,7 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                     </div>
                     <div className="card-meta-right">
                         {commentCount > 0 && (
-                            <span className={`card-comment-count ${badgeUpdated ? 'badge-updated' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className="card-comment-count" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <MessageSquare size={12} /> {commentCount}
                             </span>
                         )}
@@ -163,7 +129,7 @@ export default function TaskCard({ task, dimmed, onEdit, isOverlay }) {
                             <span className="upload-spinner-card" title="Uploading..." />
                         )}
                         {doneAttachments > 0 && (
-                            <span className={`card-attachment-count ${badgeUpdated ? 'badge-updated' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className="card-attachment-count" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Paperclip size={12} /> {doneAttachments}
                             </span>
                         )}

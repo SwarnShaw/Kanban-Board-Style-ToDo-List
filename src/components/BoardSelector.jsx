@@ -70,9 +70,14 @@ export default function BoardSelector() {
 
     return (
         <div className="board-selector" ref={ref}>
-            <button ref={buttonRef} className="board-selector-btn" onClick={() => setOpen(!open)}>
-                {activeBoard ? activeBoard.name : 'My Board'}
-                <ChevronDown className="board-selector-chevron" size={14} />
+            <button ref={buttonRef} className="reference-logo" onClick={() => setOpen(!open)}>
+                <div className="ref-logo-bg">
+                    <div className="ref-logo-icon">
+                        <span /><span /><span /><span />
+                    </div>
+                </div>
+                <span className="ref-logo-text">{activeBoard ? activeBoard.name : 'My Board'}</span>
+                <ChevronDown className="ref-logo-chevron" size={14} />
             </button>
 
             {open && (

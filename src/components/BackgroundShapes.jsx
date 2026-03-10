@@ -62,25 +62,21 @@ export default function BackgroundShapes() {
 
                 const phys = physics[index]
 
-                // Higher duration = slower shape = more influence
-                const speedFactor = shapesData[index].duration / 10
-
-                if (dist < 40 && mx > -500) {
-                    const force = (40 - dist) / 40 // 0 to 1
+                if (dist < 120 && mx > -500) {
+                    const force = (120 - dist) / 120 // 0 to 1
                     const nx = dx / (dist || 1)
                     const ny = dy / (dist || 1)
 
-                    const pushStrength = 15 * speedFactor // Very weak push
-                    phys.targetX = nx * force * pushStrength
-                    phys.targetY = ny * force * pushStrength
+                    phys.targetX = nx * force * 50 // Push outward by max 50px
+                    phys.targetY = ny * force * 50
                 } else {
                     phys.targetX = 0
                     phys.targetY = 0
                 }
 
-                // Smooth organic ease (very low factor)
-                phys.currentX += (phys.targetX - phys.currentX) * 0.03
-                phys.currentY += (phys.targetY - phys.currentY) * 0.03
+                // Smooth ease
+                phys.currentX += (phys.targetX - phys.currentX) * 0.08
+                phys.currentY += (phys.targetY - phys.currentY) * 0.08
 
                 el.style.transform = `translate3d(${phys.currentX}px, ${phys.currentY}px, 0)`
             })
