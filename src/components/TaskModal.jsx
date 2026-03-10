@@ -201,21 +201,19 @@ export default function TaskModal({ mode, taskId: existingTaskId, columnId, onCl
                             />
                         </div>
 
-                        {/* Column (mobile) */}
-                        {(isMobile || !isCreate) && (
-                            <div className="modal-column-select" style={{ display: isMobile ? 'block' : undefined }}>
-                                <span className="field-label">Column</span>
-                                <select
-                                    className="modal-input"
-                                    value={draft.columnId}
-                                    onChange={e => setDraft(d => ({ ...d, columnId: e.target.value }))}
-                                >
-                                    {FIXED_COLUMNS.map(col => (
-                                        <option key={col.id} value={col.id}>{col.title}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
+                        {/* Column */}
+                        <div className="modal-column-select">
+                            <span className="field-label">Column</span>
+                            <select
+                                className="modal-input"
+                                value={draft.columnId}
+                                onChange={e => setDraft(d => ({ ...d, columnId: e.target.value }))}
+                            >
+                                {FIXED_COLUMNS.map(col => (
+                                    <option key={col.id} value={col.id}>{col.title}</option>
+                                ))}
+                            </select>
+                        </div>
 
                         {/* Assignee */}
                         <div>

@@ -1,10 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react'
-<<<<<<< HEAD
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { DndContext, closestCorners, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
-=======
-import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
->>>>>>> parent of 738a7e0 (v3)
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardContext } from '../context/BoardContext'
 import { FIXED_COLUMNS } from '../constants/columns'
@@ -19,11 +15,27 @@ import Swimlanes from './Swimlanes'
 export default function Board({ searchQuery, filters, swimlaneMode, onAddTask, onEditTask, setFilters, onReminderChange, hasActiveFilters }) {
     const { activeTasks, activeLabels, activeBoard, dispatch } = useBoardContext()
     const [activeTask, setActiveTask] = useState(null)
-
+    const [activeColIndex, setActiveColIndex] = useState(0)
+    const scrollRef = useRef(null)
     const isMobile = useIsMobile()
 
+    useEffect(() => {
+        const el = scrollRef.current
+        if (!el || !isMobile) return
+        const handler = () => {
+            const colWidth = el.scrollWidth / FIXED_COLUMNS.length
+            const index = Math.round(el.scrollLeft / colWidth)
+            setActiveColIndex(Math.min(FIXED_COLUMNS.length - 1, Math.max(0, index)))
+        }
+        el.addEventListener('scroll', handler, { passive: true })
+        return () => el.removeEventListener('scroll', handler)
+    }, [isMobile])
+
+
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+        useSensor(KeyboardSensor)
     )
 
     const filteredTasks = useMemo(() => {
@@ -118,13 +130,29 @@ export default function Board({ searchQuery, filters, swimlaneMode, onAddTask, o
     return (
         <>
             <ReminderBanner setFilters={setFilters} hasActiveFilters={hasActiveFilters} onVisibilityChange={onReminderChange} />
-            <div className={`board-container ${swimlaneMode !== 'none' ? 'swimlanes-active' : ''}`}>
+            <div className={`board-container ${swimlaneMode !== 'none' ? 'swimlanes-active' : ''}`} ref={scrollRef}>
                 <DndContext sensors={sensors} collisionDetection={closestCorners}
                     onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                     {boardContent}
                     <DragOverlay>{activeTask && <TaskCard task={activeTask} isOverlay />}</DragOverlay>
                 </DndContext>
             </div>
+            {isMobile && swimlaneMode === 'none' && (
+                <div className="board-scroll-dots" aria-hidden="true">
+                    {FIXED_COLUMNS.map((col, i) => (
+                        <span
+                            key={col.id}
+                            className={`board-scroll-dot ${i === activeColIndex ? 'board-scroll-dot--active' : ''}`}
+                            onClick={() => {
+                                const el = scrollRef.current
+                                if (!el) return
+                                const colWidth = el.scrollWidth / FIXED_COLUMNS.length
+                                el.scrollTo({ left: colWidth * i, behavior: 'smooth' })
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
         </>
     )
 }

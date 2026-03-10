@@ -2,7 +2,7 @@
 
 A fast, polished, local-first Kanban task management app built with React 18 + Vite. No sign-up, no cloud — just open and manage your day.
 
-**🔗 [Live Demo](https://kanban-board-style-to-do-list.vercel.app/)**
+**🔗 [Live Demo](https://todofyer.vercel.app/)**
 
 
 ## ✨ Features

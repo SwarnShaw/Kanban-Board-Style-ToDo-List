@@ -4,6 +4,24 @@ import { FIXED_COLUMNS } from '../constants/columns'
 import { sortTasks } from '../utils/sortTasks'
 import { formatDateShort, isOverdue, isDueToday, isDueThisWeek } from '../utils/formatDate'
 import { activityId } from '../utils/idGenerators'
+import { useIsMobile } from '../hooks/useIsMobile'
+
+const SORT_OPTIONS = [
+    { key: 'title', label: 'Title' },
+    { key: 'priority', label: 'Priority' },
+    { key: 'column', label: 'Column' },
+    { key: 'assignee', label: 'Assignee' },
+    { key: 'dueDate', label: 'Due Date' },
+]
+
+function nameToColor(name) {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    const h = Math.abs(hash) % 360
+    return `hsl(${h}, 55%, 50%)`
+}
 
 export default function ListView({ searchQuery, filters, onEditTask }) {
     const { activeTasks, activeLabels, dispatch } = useBoardContext()
@@ -11,6 +29,7 @@ export default function ListView({ searchQuery, filters, onEditTask }) {
     const [sortDir, setSortDir] = useState('asc')
     const [menuOpen, setMenuOpen] = useState(null)
     const [deleteConfirm, setDeleteConfirm] = useState(null)
+    const isMobile = useIsMobile()
 
     const handleSort = (col) => {
         if (sortCol === col) {
@@ -119,95 +138,193 @@ export default function ListView({ searchQuery, filters, onEditTask }) {
 
     const hasActiveFilters = filters.priority.length > 0 || filters.dueDate.length > 0 ||
         filters.labels.length > 0 || filters.hideCompleted
-    const topOffset = hasActiveFilters ? 92 : 56
+
+    const priorityColors = {
+        high: 'var(--priority-high)',
+        medium: 'var(--priority-medium)',
+        low: 'var(--priority-low)'
+    }
 
     return (
-        <div className="list-view-container" style={{ paddingTop: topOffset + 20 }}>
-            <table className="list-table">
-                <thead>
-                    <tr>
-                        <th onClick={() => handleSort('title')}>Title{indicator('title')}</th>
-                        <th onClick={() => handleSort('priority')}>Priority{indicator('priority')}</th>
-                        <th onClick={() => handleSort('column')}>Column{indicator('column')}</th>
-                        <th onClick={() => handleSort('assignee')}>Assignee{indicator('assignee')}</th>
-                        <th onClick={() => handleSort('dueDate')}>Due Date{indicator('dueDate')}</th>
-                        <th>Labels</th>
-                        <th style={{ width: 40 }}>⋮</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div className="lv-container">
+
+            {/* ── SORT BAR ── */}
+            <div className="lv-sort-bar">
+                <div className="lv-sort-scroll">
+                    {SORT_OPTIONS.map(opt => (
+                        <button
+                            key={opt.key}
+                            type="button"
+                            className={`lv-sort-chip ${sortCol === opt.key ? 'lv-sort-chip--active' : ''}`}
+                            onClick={() => handleSort(opt.key)}
+                        >
+                            {opt.label}
+                            {sortCol === opt.key && (
+                                <span className="lv-sort-dir">
+                                    {sortDir === 'asc' ? '↑' : '↓'}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+                <span className="lv-task-count">
+                    {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
+                </span>
+            </div>
+
+            {/* ── DESKTOP TABLE HEADER ── */}
+            {!isMobile && (
+                <table className="list-table">
+                    <thead>
+                        <tr>
+                            <th onClick={() => handleSort('title')}>Title{indicator('title')}</th>
+                            <th onClick={() => handleSort('priority')}>Priority{indicator('priority')}</th>
+                            <th onClick={() => handleSort('column')}>Column{indicator('column')}</th>
+                            <th onClick={() => handleSort('assignee')}>Assignee{indicator('assignee')}</th>
+                            <th onClick={() => handleSort('dueDate')}>Due Date{indicator('dueDate')}</th>
+                            <th>Labels</th>
+                            <th style={{ width: 40 }}>⋮</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredTasks.map(task => {
+                            const col = FIXED_COLUMNS.find(c => c.id === task.columnId)
+                            const taskLabels = (task.labelIds || []).map(id => activeLabels.find(l => l.id === id)).filter(Boolean)
+                            return (
+                                <tr key={task.id} onClick={() => onEditTask(task.id)}>
+                                    <td style={{ fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {task.title}
+                                    </td>
+                                    <td>
+                                        {task.priority && (
+                                            <span className="list-priority-pill" style={{
+                                                backgroundColor: `color-mix(in srgb, ${priorityColors[task.priority]} 15%, transparent)`,
+                                                color: priorityColors[task.priority]
+                                            }}>
+                                                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td onClick={e => e.stopPropagation()}>
+                                        <select
+                                            className="list-column-select"
+                                            value={task.columnId}
+                                            onChange={e => handleMoveTask(task.id, e.target.value)}
+                                        >
+                                            {FIXED_COLUMNS.map(c => (
+                                                <option key={c.id} value={c.id}>{c.title}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td style={{ color: task.assignee ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                                        {task.assignee || '—'}
+                                    </td>
+                                    <td>
+                                        {task.dueDate ? (
+                                            <span className={`due-chip ${isOverdue(task.dueDate) ? 'overdue' : isDueToday(task.dueDate) ? 'due-today' : ''}`}>
+                                                {formatDateShort(task.dueDate)}
+                                            </span>
+                                        ) : '—'}
+                                    </td>
+                                    <td onClick={e => e.stopPropagation()}>
+                                        <div className="list-labels-cell">
+                                            {taskLabels.slice(0, 2).map(l => (
+                                                <span key={l.id} className="list-label-pill" style={{ backgroundColor: l.color }}>{l.name}</span>
+                                            ))}
+                                            {taskLabels.length > 2 && <span className="list-label-overflow">+{taskLabels.length - 2}</span>}
+                                        </div>
+                                    </td>
+                                    <td className="list-actions-cell" onClick={e => e.stopPropagation()}>
+                                        <button className="list-actions-btn" onClick={() => setMenuOpen(menuOpen === task.id ? null : task.id)}>⋮</button>
+                                        {menuOpen === task.id && (
+                                            <div className="list-actions-menu">
+                                                {deleteConfirm === task.id ? (
+                                                    <>
+                                                        <div style={{ padding: '4px 10px', fontSize: 11, color: 'var(--danger)' }}>Delete?</div>
+                                                        <button className="delete" onClick={() => handleDelete(task.id)}>Yes, delete</button>
+                                                        <button onClick={() => setDeleteConfirm(null)}>Cancel</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => { onEditTask(task.id); setMenuOpen(null) }}>Edit</button>
+                                                        <button className="delete" onClick={() => setDeleteConfirm(task.id)}>Delete</button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+            )}
+
+            {/* ── MOBILE CARD LIST ── */}
+            {isMobile && (
+                <div className="lv-list">
+                    {filteredTasks.length === 0 && (
+                        <div className="lv-empty">
+                            <span className="lv-empty-icon">📋</span>
+                            <span className="lv-empty-text">No tasks found</span>
+                        </div>
+                    )}
+
                     {filteredTasks.map(task => {
                         const col = FIXED_COLUMNS.find(c => c.id === task.columnId)
                         const taskLabels = (task.labelIds || []).map(id => activeLabels.find(l => l.id === id)).filter(Boolean)
-                        const priorityColors = {
-                            high: 'var(--priority-high)',
-                            medium: 'var(--priority-medium)',
-                            low: 'var(--priority-low)'
-                        }
+                        const overdue = isOverdue(task.dueDate)
+                        const today = isDueToday(task.dueDate)
 
                         return (
-                            <tr key={task.id} onClick={() => onEditTask(task.id)}>
-                                <td style={{ fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    {task.title}
-                                </td>
-                                <td>
-                                    {task.priority && (
-                                        <span className="list-priority-pill" style={{
-                                            backgroundColor: `color-mix(in srgb, ${priorityColors[task.priority]} 15%, transparent)`,
-                                            color: priorityColors[task.priority]
-                                        }}>
-                                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            <div
+                                key={task.id}
+                                className="lv-mob-row"
+                                onClick={() => onEditTask(task.id)}
+                                role="button"
+                                tabIndex={0}
+                            >
+                                {/* Priority color bar */}
+                                <div
+                                    className="lv-mob-row__priority-bar"
+                                    data-priority={task.priority || 'none'}
+                                />
+
+                                {/* Content */}
+                                <div className="lv-mob-row__content">
+                                    {/* Top: title + column badge */}
+                                    <div className="lv-mob-row__top">
+                                        <span className="lv-mob-row__title">
+                                            {task.title || 'Untitled'}
                                         </span>
-                                    )}
-                                </td>
-                                <td onClick={e => e.stopPropagation()}>
-                                    <select
-                                        className="list-column-select"
-                                        value={task.columnId}
-                                        onChange={e => handleMoveTask(task.id, e.target.value)}
-                                    >
-                                        {FIXED_COLUMNS.map(c => (
-                                            <option key={c.id} value={c.id}>{c.title}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td style={{ color: task.assignee ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                                    {task.assignee || '—'}
-                                </td>
-                                <td>
-                                    {task.dueDate ? (
-                                        <span className={`due-chip ${isOverdue(task.dueDate) ? 'overdue' : isDueToday(task.dueDate) ? 'due-today' : ''}`}>
-                                            {formatDateShort(task.dueDate)}
+                                        <span className={`lv-mob-row__col-badge lv-mob-row__col-badge--${task.columnId}`}>
+                                            {col?.title || '—'}
                                         </span>
-                                    ) : '—'}
-                                </td>
-                                <td onClick={e => e.stopPropagation()}>
-                                    <div className="list-labels-cell">
-                                        {taskLabels.slice(0, 2).map(l => (
-                                            <span key={l.id} className="list-label-pill" style={{ backgroundColor: l.color }}>{l.name}</span>
-                                        ))}
-                                        {taskLabels.length > 2 && <span className="list-label-overflow">+{taskLabels.length - 2}</span>}
                                     </div>
-                                </td>
-                                <td className="list-actions-cell" onClick={e => e.stopPropagation()}>
-                                    <button className="list-actions-btn" onClick={() => setMenuOpen(menuOpen === task.id ? null : task.id)}>⋮</button>
-                                    {menuOpen === task.id && (
-                                        <div className="list-actions-menu">
-                                            {deleteConfirm === task.id ? (
-                                                <>
-                                                    <div style={{ padding: '4px 10px', fontSize: 11, color: 'var(--danger)' }}>Delete?</div>
-                                                    <button className="delete" onClick={() => handleDelete(task.id)}>Yes, delete</button>
-                                                    <button onClick={() => setDeleteConfirm(null)}>Cancel</button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button onClick={() => { onEditTask(task.id); setMenuOpen(null) }}>Edit</button>
-                                                    <button className="delete" onClick={() => setDeleteConfirm(task.id)}>Delete</button>
-                                                </>
+
+                                    {/* Labels */}
+                                    {taskLabels.length > 0 && (
+                                        <div className="lv-mob-row__labels">
+                                            {taskLabels.slice(0, 3).map(l => (
+                                                <span
+                                                    key={l.id}
+                                                    className="lv-mob-row__label-chip"
+                                                    style={{
+                                                        background: l.color + '22',
+                                                        borderColor: l.color + '55',
+                                                        color: l.color
+                                                    }}
+                                                >
+                                                    {l.name}
+                                                </span>
+                                            ))}
+                                            {taskLabels.length > 3 && (
+                                                <span className="lv-mob-row__label-more">
+                                                    +{taskLabels.length - 3}
+                                                </span>
                                             )}
                                         </div>
                                     )}
-<<<<<<< HEAD
 
                                     {/* Meta */}
                                     <div className="lv-mob-row__meta">
@@ -254,14 +371,10 @@ export default function ListView({ searchQuery, filters, onEditTask }) {
                                 {/* Chevron */}
                                 <span className="lv-mob-row__chevron" aria-hidden="true">›</span>
                             </div>
-=======
-                                </td>
-                            </tr>
->>>>>>> parent of 738a7e0 (v3)
                         )
                     })}
-                </tbody>
-            </table>
+                </div>
+            )}
         </div>
     )
 }
