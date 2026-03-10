@@ -8,6 +8,7 @@ import TaskModal from './components/TaskModal'
 import BackgroundShapes from './components/BackgroundShapes'
 import FilterDropdown from './components/FilterDropdown'
 import { Layers, Filter, LayoutGrid, List, Plus } from 'lucide-react'
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react'
 
 export default function App() {
     const [view, setView] = useState('board')
@@ -234,6 +235,8 @@ export default function App() {
                     onClose={closeModal}
                 />
             )}
+
+            <VercelAnalytics />
         </BoardProvider>
     )
 }
