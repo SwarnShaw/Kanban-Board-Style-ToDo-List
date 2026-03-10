@@ -222,7 +222,7 @@ export default function Navbar({
                         <Download size={16} />
                     </button>
                     <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme">
-                        <Moon size={16} />
+                        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                     </button>
                 </div>
 

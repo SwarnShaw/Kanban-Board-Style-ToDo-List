@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { DndContext, closestCorners, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardContext } from '../context/BoardContext'
@@ -15,7 +16,7 @@ export default function Board({ searchQuery, filters, swimlaneMode, onAddTask, o
     const { activeTasks, activeLabels, activeBoard, dispatch } = useBoardContext()
     const [activeTask, setActiveTask] = useState(null)
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const isMobile = useIsMobile()
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -116,13 +117,11 @@ export default function Board({ searchQuery, filters, swimlaneMode, onAddTask, o
         <>
             <ReminderBanner setFilters={setFilters} hasActiveFilters={hasActiveFilters} onVisibilityChange={onReminderChange} />
             <div className={`board-container ${swimlaneMode !== 'none' ? 'swimlanes-active' : ''}`}>
-                {isMobile ? boardContent : (
-                    <DndContext sensors={sensors} collisionDetection={closestCorners}
-                        onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                        {boardContent}
-                        <DragOverlay>{activeTask && <TaskCard task={activeTask} isOverlay />}</DragOverlay>
-                    </DndContext>
-                )}
+                <DndContext sensors={sensors} collisionDetection={closestCorners}
+                    onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                    {boardContent}
+                    <DragOverlay>{activeTask && <TaskCard task={activeTask} isOverlay />}</DragOverlay>
+                </DndContext>
             </div>
         </>
     )

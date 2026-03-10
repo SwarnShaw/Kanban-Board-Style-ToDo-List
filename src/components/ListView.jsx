@@ -356,7 +356,7 @@ export default function ListView({ searchQuery, filters, onEditTask }) {
 
                                         {task.checklist?.length > 0 && (
                                             <span className="lv-mob-row__checklist">
-                                                ☑ {task.checklist.filter(i => i.done).length}/{task.checklist.length}
+                                                ☑ {task.checklist.filter(i => i.isChecked).length}/{task.checklist.length}
                                             </span>
                                         )}
 

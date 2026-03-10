@@ -92,7 +92,7 @@ export default function BackgroundShapes() {
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove)
-            document.addEventListener('mouseleave', handleMouseLeave)
+            document.removeEventListener('mouseleave', handleMouseLeave)
             cancelAnimationFrame(requestRef.current)
         }
     }, [shapesData])

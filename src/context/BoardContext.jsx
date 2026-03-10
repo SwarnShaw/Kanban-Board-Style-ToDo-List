@@ -235,6 +235,10 @@ function boardReducer(state, action) {
 
         case 'SET_THEME':
             document.documentElement.setAttribute('data-theme', payload.theme)
+            try {
+                const metaTheme = document.querySelector('meta[name="theme-color"]')
+                if (metaTheme) metaTheme.setAttribute('content', payload.theme === 'dark' ? '#121212' : '#ffffff')
+            } catch (e) { }
             return { ...state, theme: payload.theme }
 
         case 'TOGGLE_LABEL_ON_TASK':

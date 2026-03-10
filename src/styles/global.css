@@ -5741,7 +5741,7 @@ body.is-dragging {
     .filter-backdrop {
         position: fixed;
         inset: 0;
-        z-index: 9998;
+        z-index: 10001;
         background: rgba(0, 0, 0, 0.55);
         pointer-events: auto;
         -webkit-tap-highlight-color: transparent;
@@ -5760,7 +5760,7 @@ body.is-dragging {
         border-radius: 20px 20px 0 0 !important;
         border: 1px solid var(--border) !important;
         border-bottom: none !important;
-        z-index: 10000 !important;
+        z-index: 10002 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch !important;
@@ -6271,5 +6271,25 @@ body.is-dragging {
         .mob-drawer {
             padding-top: env(safe-area-inset-top);
         }
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY: REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .bg-shapes-container {
+        display: none !important;
     }
 }

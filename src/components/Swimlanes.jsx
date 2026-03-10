@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useBoardContext } from '../context/BoardContext'
 import { FIXED_COLUMNS } from '../constants/columns'
 import { sortTasks } from '../utils/sortTasks'
@@ -10,6 +10,10 @@ export default function Swimlanes({ swimlaneMode, columnTasks, searchQuery, matc
     const [collapsed, setCollapsed] = useState({})
 
     const toggleCollapse = (key) => setCollapsed(c => ({ ...c, [key]: !c[key] }))
+
+    useEffect(() => {
+        setCollapsed({})
+    }, [swimlaneMode])
 
     const groups = useMemo(() => {
         if (swimlaneMode === 'priority') {

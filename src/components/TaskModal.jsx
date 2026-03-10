@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { useBoardContext } from '../context/BoardContext'
 import { FIXED_COLUMNS } from '../constants/columns'
 import { taskId as genTaskId, activityId as genActivityId } from '../utils/idGenerators'
@@ -35,8 +36,19 @@ export default function TaskModal({ mode, taskId: existingTaskId, columnId, onCl
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const [lightboxFile, setLightboxFile] = useState(null)
 
+    const isDirty = JSON.stringify(draft) !== JSON.stringify(originalDraft)
+
+    const handleClose = useCallback(() => {
+        if (isDirty) {
+            if (!window.confirm('Discard unsaved changes?')) return
+        }
+        onClose()
+    }, [isDirty, onClose])
+
     useEffect(() => {
         if (titleRef.current) titleRef.current.focus()
+        document.body.classList.add('modal-open')
+        return () => document.body.classList.remove('modal-open')
     }, [])
 
     useEffect(() => {
@@ -48,16 +60,7 @@ export default function TaskModal({ mode, taskId: existingTaskId, columnId, onCl
         }
         document.addEventListener('keydown', handleKey)
         return () => document.removeEventListener('keydown', handleKey)
-    }, [lightboxFile, draft, originalDraft])
-
-    const isDirty = JSON.stringify(draft) !== JSON.stringify(originalDraft)
-
-    const handleClose = useCallback(() => {
-        if (isDirty) {
-            if (!window.confirm('Discard unsaved changes?')) return
-        }
-        onClose()
-    }, [isDirty, onClose])
+    }, [lightboxFile, handleClose])
 
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) handleClose()
@@ -147,7 +150,7 @@ export default function TaskModal({ mode, taskId: existingTaskId, columnId, onCl
         onClose()
     }
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const isMobile = useIsMobile()
 
     return (
         <>

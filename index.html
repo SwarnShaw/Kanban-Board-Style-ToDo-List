@@ -11,12 +11,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#121212">
   <script>
     (function () {
       try {
         var data = localStorage.getItem('todo_app_v1');
         var theme = data ? JSON.parse(data).theme || 'dark' : 'dark';
         document.documentElement.setAttribute('data-theme', theme);
+        var themeColor = theme === 'dark' ? '#121212' : '#ffffff';
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', themeColor);
       } catch (e) {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
